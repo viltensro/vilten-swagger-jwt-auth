@@ -5,22 +5,35 @@ info:
   version: 0.1.0
 
 servers:
-  - url: http://api.example.com/v1
-    description: Optional server description, e.g. Main (production) server
-  - url: http://staging-api.example.com
-    description: Optional server description, e.g. Internal staging server for testing
+  - url: http://localhost:10001/v1
+    description: Servers are in progress
+  - url: http://auth.vil10.com/v1
+    description: Servers are in progress
 
 paths:
-  /users:
+  /server/info:
     get:
-      summary: Returns a list of users.
-      description: Optional extended description in CommonMark or HTML.
+      summary: Returns an information JSON.
+      description: Returns an information about API, version, name, developer, etc.
+      operationId: server/getServerInfo
       responses:
-        '200':    # status code
-          description: A JSON array of user names
+        '200':
+          description: A JSON with information
           content:
             application/json:
-              schema: 
-                type: array
-                items: 
-                  type: string
+              schema:
+                $ref: '#/components/schemas/ServerInfo'
+components:
+  schemas:
+    ServerInfo:
+      type: object
+      properties:
+        version:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        developedBy:
+          type: string
+    
