@@ -1,0 +1,700 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: vilten-swagger-jwt-auth
+  description: Vilten JWT Auth
+basePath: /api/v1
+tags:
+  - name: Client
+    description: Client APIs
+  - name: Auth
+    description: Authorization APIs
+  - name: Admin
+    description: Admin APIs
+  - name: Specification
+    description: The swagger API specification
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+
+definitions:
+  ResetPasswordResponse:
+    type: object
+    required:
+      - username
+      - otp
+    properties:
+      username:
+        type: string
+      otp:
+        type: string
+  UserResponse:
+    type: object
+    required:
+      - username
+      - extras
+    properties:
+      username:
+        type: string
+      extras:
+        type: object
+  LoginData:
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+      mfaToken:
+        type: string
+  ResetMfaData:
+    type: object
+    required:
+      - mfaType
+    properties:
+      mfaType:
+        type: string
+  SignupUserData:
+    type: object
+    required:
+      - username
+      - password
+      - email
+      - phone
+      - fullName
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+      email:
+        type: string
+      phone:
+        type: string
+      fullName:
+        type: string
+  ActivationUserData:
+    type: object
+    required:
+      - username
+      - activationCode
+    properties:
+      username:
+        type: string
+      activationCode:
+        type: string
+  ActivationResendData:
+    type: object
+    required:
+      - username
+    properties:
+      username:
+        type: string
+  VerifyMfaData:
+    type: object
+    required:
+      - mfaToken
+    properties:
+      mfaToken:
+        type: string
+  ChangePasswordData:
+    type: object
+    required:
+      - oldPassword
+      - newPassword
+    properties:
+      oldPassword:
+        type: string
+      newPassword:
+        type: string
+  ForgotPasswordData:
+    type: object
+    required:
+      - email
+    properties:
+      email:
+        type: string
+  ForgotPasswordResetData:
+    type: object
+    required:
+      - email
+      - resetCode
+      - password
+    properties:
+      email:
+        type: string
+      resetCode:
+        type: string
+      password:
+        type: string
+  SignupResponse:
+    type: object
+    required:
+      - success
+      - data
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        required:
+          - username
+          - sub
+        properties:
+          username:
+            type: string
+          sub:
+            type: string
+  LoginResponse:
+    type: object
+    required:
+      - success
+      - data
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        required:
+          - username
+          - token
+        properties:
+          username:
+            type: string
+          token:
+            type: string
+  LogoutResponse:
+    type: object
+    required:
+      - success
+      - data
+    properties:
+      success:
+        type: boolean
+      data:
+        type: object
+        required:
+          - username
+        properties:
+          username:
+            type: string
+  ErrorResponse:
+    type: object
+    required:
+      - success
+      - code
+      - message
+    properties:
+      success:
+        type: boolean
+        default: false
+      code:
+        type: number
+        default: 200
+      message:
+        type: string
+        default: OK
+      stack:
+        type: string
+  SuccessResponse:
+    type: object
+    required:
+      - success
+    properties:
+      success:
+        type: boolean
+        default: true
+      data:
+        type: object
+
+paths:
+  # AUTH API
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      description: Login existing user returns JWT token
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: loginData
+          description: Login user
+          required: true
+          schema:
+            $ref: "#/definitions/LoginData"
+      responses:
+        200:
+          description: Login response
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /auth/logout:
+    get:
+      tags:
+        - Auth
+      description: Logout existing logged user
+      x-security-scopes:
+        - all
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+      responses:
+        200:
+          description: Successfull logout
+          schema:
+            $ref: "#/definitions/LogoutResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  # CLIENT API
+  /client/signup:
+    post:
+      tags:
+        - Client
+      description: Signup new user unique email and username
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: userData
+          description: Signup user data
+          required: true
+          schema:
+            $ref: "#/definitions/SignupUserData"
+      responses:
+        200:
+          description: Signup response
+          schema:
+            $ref: "#/definitions/SignupResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /client/activate-user:
+    post:
+      tags:
+        - Client
+      description: Activate signed user
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: userActivationData
+          description: Activation user data
+          required: true
+          schema:
+            $ref: "#/definitions/ActivationUserData"
+      responses:
+        200:
+          description: Success response
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /client/resend-activation:
+    post:
+      tags:
+        - Client
+      description: Resend email with activation code
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: activationResendData
+          description: Activation code resend username
+          required: true
+          schema:
+            $ref: "#/definitions/ActivationResendData"
+      responses:
+        200:
+          description: Success response
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /client/forgot-password:
+    post:
+      tags:
+        - Client
+      description: Forgot password send auth notification to change pass with token
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: forgotPasswordData
+          description: Forgot password code resend email
+          required: true
+          schema:
+            $ref: "#/definitions/ForgotPasswordData"
+      responses:
+        200:
+          description: Success response
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /client/forgot-password-reset:
+    post:
+      tags:
+        - Client
+      description: Forgot password change password after token verifing
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: forgotPasswordResetData
+          description: Forgot password code reset password
+          required: true
+          schema:
+            $ref: "#/definitions/ForgotPasswordResetData"
+      responses:
+        200:
+          description: Success response
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /client/change-password:
+    post:
+      tags:
+        - Client
+      description: Change password of logged in user
+      x-security-scopes:
+        - all
+      consumes:
+        - application/json
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+        - in: body
+          name: changePasswordData
+          description: Change password of logged in user
+          required: true
+          schema:
+            $ref: "#/definitions/ChangePasswordData"
+      responses:
+        200:
+          description: Success response
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /client/reset-mfa:
+    post:
+      tags:
+        - Client
+      description: reset MFA settings
+      x-security-scopes:
+        - all
+      consumes:
+        - application/json
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+        - in: body
+          name: resetMfaData
+          description: Reset MFA data
+          required: true
+          schema:
+            $ref: "#/definitions/ResetMfaData"
+      responses:
+        200:
+          description: Success response
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /client/verify-mfa:
+    post:
+      tags:
+        - Client
+      description: verify MFA token and enable MFA authorization
+      x-security-scopes:
+        - all
+      consumes:
+        - application/json
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+        - in: body
+          name: verifyMfaData
+          description: Verify Mfa data
+          required: true
+          schema:
+            $ref: "#/definitions/VerifyMfaData"
+      responses:
+        200:
+          description: User response
+          schema:
+            $ref: "#/definitions/UserResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /client/disable-mfa:
+    post:
+      tags:
+        - Client
+      description: disable MFA authorization
+      x-security-scopes:
+        - all
+      consumes:
+        - application/json
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+        - in: body
+          name: verifyMfaData
+          description: Verify Mfa data
+          required: true
+          schema:
+            $ref: "#/definitions/VerifyMfaData"
+      responses:
+        200:
+          description: User response
+          schema:
+            $ref: "#/definitions/UserResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /client/user-extras:
+    get:
+      tags:
+        - Client
+      description: Get extras of logged in user
+      x-security-scopes:
+        - all
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+      responses:
+        200:
+          description: User response
+          schema:
+            $ref: "#/definitions/UserResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags:
+        - Client
+      description: Set extras of logged in user
+      x-security-scopes:
+        - all
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+        - in: body
+          name: extras
+          description: My new extras values of user
+          required: true
+          schema:
+            type: object
+      responses:
+        200:
+          description: User response
+          schema:
+            $ref: "#/definitions/UserResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  # AUTH API
+  /admin/user-delete/{username}:
+    delete:
+      tags:
+        - Admin
+      description: Delete existing disabled user
+      x-security-scopes:
+        - admin
+        - user-write
+      parameters:
+        - in: path
+          name: username
+          type: string
+          required: true
+          description: Username of the user.
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+      responses:
+        200:
+          description: SuccessResponse
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /admin/user-list:
+    post:
+      tags:
+        - Admin
+      description: Get list of existing users with filter
+      x-security-scopes:
+        - admin
+        - user-read
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+        - in: body
+          name: filter
+          description: Filter for user list
+          required: false
+          schema:
+            type: object
+      responses:
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /admin/user-extras/{username}:
+    get:
+      tags:
+        - Admin
+      description: Get extras of user
+      x-security-scopes:
+        - admin
+        - user-read
+      parameters:
+        - in: path
+          name: username
+          type: string
+          required: true
+          description: Username of the user.
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+      responses:
+        200:
+          description: User response
+          schema:
+            $ref: "#/definitions/UserResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags:
+        - Admin
+      description: Set extras of user by username
+      x-security-scopes:
+        - admin
+        - user-write
+      parameters:
+        - in: path
+          name: username
+          type: string
+          required: true
+          description: Username of the user.
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+        - in: body
+          name: extras
+          description: My new extras values of user
+          required: true
+          schema:
+            type: object
+      responses:
+        200:
+          description: User response
+          schema:
+            $ref: "#/definitions/UserResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /admin/user-reset-password/{username}:
+    get:
+      tags:
+        - Admin
+      description: Reset user password to random OTP
+      x-security-scopes:
+        - admin
+        - user-write
+      parameters:
+        - in: path
+          name: username
+          type: string
+          required: true
+          description: Username of the user.
+        - in: header
+          name: Authorization
+          type: string
+          description: JWT token with required roles [ all ]
+          required: true
+      responses:
+        200:
+          description: Reset Password Response
+          schema:
+            $ref: "#/definitions/ResetPasswordResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /spec:
+    get:
+      tags:
+        - Specification
+      responses:
+        200:
+          description: Return the API specification
