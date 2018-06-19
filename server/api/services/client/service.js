@@ -74,6 +74,7 @@ class ClientService {
                         sub: sub,
                         mfaType: disabled,
                         mfaCode: '',
+                        expirationToken: ''
                       }
                       users.createUser(req.body.username, req.body.password, extras, err => {
                         if (err) reject(new ErrorResponse(false, 'Server error.', 500, err))
@@ -385,6 +386,7 @@ class ClientService {
               extras.activationCodeExpiration = null
               extras.mfaCode = null
               extras.mfaCodeExpiration = null
+              extras.expirationToken = null
               resolve(new SuccessResponse(true, { username: username, extras: extras}))
             }
           })
@@ -421,7 +423,8 @@ class ClientService {
                   extraKey !== 'mfaType' &&
                   extraKey !== 'mfaCode' &&
                   extraKey !== 'mfaCodeExpiration' &&
-                  extraKey !== 'roles'
+                  extraKey !== 'roles' &&
+                  extraKey !== 'expirationToken'
                 )
                 extras[extraKey] = newExtras[extraKey]
               })

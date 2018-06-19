@@ -9,6 +9,14 @@ export class Controller {
         .json(err))
   }
 
+  refresh (req, res) {
+    AuthService.refresh(req)
+      .then(r => res.json(r))
+      .catch(err => res
+        .status(err.code)
+        .json(err))
+  }
+
   logout (req, res) {
     AuthService.logout(req)
       .then(r => res.json(r))

@@ -39,6 +39,7 @@ class AuthService {
         l.info('AuthService.login()')
         userMan().then(users => {
           users.authenticateUser(req.body.username, req.body.password, (err, result) => {
+            console.dir(result)
             if (!result.userExists) reject(new ErrorResponse(false, 'Invalid username.', 401))
             else if (!result.passwordsMatch) reject(new ErrorResponse(false, 'Invalid password.', 401))
             else {
@@ -62,6 +63,7 @@ class AuthService {
                         algorithm: 'HS512',
                         issuer: 'viltensro'
                       })
+                      extras.expirationToken = randtoken.generate(process.env.EXPIRATION_TOKEN_LENGTH)
                       switch (extras.mfaType) {
                         case 'authenticator':
                           if (!req.body.mfaToken) {
@@ -75,7 +77,12 @@ class AuthService {
                             }
                             const verified = Speakeasy.totp.verify(params)
                             if (verified === true) {
-                              resolve(new SuccessResponse(true, { username: req.body.username, token: jwtToken}))
+                              LastLogin.writeLastLogin(extras.sub, req.headers['x-forwarded-for'], req.headers['user-agent'], { token: jwtToken, expirationToken: extras.expirationToken }).then(result => {
+                                resolve(new SuccessResponse(true, { username: req.body.username, token: jwtToken, expirationToken: extras.expirationToken }))
+                              }).catch(err => {
+                                l.error(err)
+                                resolve(new SuccessResponse(true, { username: req.body.username, token: jwtToken, expirationToken: extras.expirationToken }))
+                              })
                             } else {
                               reject(new ErrorResponse(false, 'Invalid MFA token.', 401, err))
                             }
@@ -114,7 +121,12 @@ class AuthService {
                                   if (err) {
                                     reject(new ErrorResponse(false, 'Unable to save mfa configuration.', 500, err))
                                   } else {
-                                    resolve(new SuccessResponse(true, { username: req.body.username, token: jwtToken}))
+                                    LastLogin.writeLastLogin(extras.sub, req.headers['x-forwarded-for'], req.headers['user-agent'], { token: jwtToken, expirationToken: extras.expirationToken }).then(result => {
+                                      resolve(new SuccessResponse(true, { username: req.body.username, token: jwtToken, expirationToken: extras.expirationToken }))
+                                    }).catch(err => {
+                                      l.error(err)
+                                      resolve(new SuccessResponse(true, { username: req.body.username, token: jwtToken, expirationToken: extras.expirationToken }))
+                                    })
                                   }
                                 })
                               } else {
@@ -126,11 +138,17 @@ class AuthService {
                           }
                           break
                         default:
-                          LastLogin.writeLastLogin(extras.sub, req.headers['x-forwarded-for'], req.headers['user-agent'], { token: jwtToken }).then(result => {
-                            resolve(new SuccessResponse(true, { username: req.body.username, token: jwtToken}))
-                          }).catch(err => {
-                            l.error(err)
-                            resolve(new SuccessResponse(true, { username: req.body.username, token: jwtToken}))
+                          users.setExtrasForUsername(req.body.username, extras, (err) => {
+                            if (err) {
+                              reject(new ErrorResponse(false, 'Server error.', 500, err))
+                            } else {
+                              LastLogin.writeLastLogin(extras.sub, req.headers['x-forwarded-for'], req.headers['user-agent'], { token: jwtToken }).then(result => {
+                                resolve(new SuccessResponse(true, { username: req.body.username, token: jwtToken, expirationToken: extras.expirationToken }))
+                              }).catch(err => {
+                                l.error(err)
+                                resolve(new SuccessResponse(true, { username: req.body.username, token: jwtToken, expirationToken: extras.expirationToken }))
+                              })
+                            }
                           })
                       }
                     }
@@ -146,6 +164,60 @@ class AuthService {
       } catch (err) {
         console.log(err)
         reject(new ErrorResponse(false, 'Unable to login.', 500, err))
+      }
+    })
+  }
+
+  refresh (req) {
+    l.info('AuthService.refresh()')
+    return new Promise(function(resolve, reject) {
+      try {
+        userMan().then(users => {
+          users.getExtrasForUsername(req.body.username, (err, extras) => {
+            if (err) reject(new ErrorResponse(false, 'Server error.', 401, err))
+            else {
+              if (!extras) reject(new ErrorResponse(false, 'User not found', 401, err))
+              else {
+                // check enabled and activated
+                if (extras.enabled !== true) reject(new ErrorResponse(false, 'User not enabled.', 401, err))
+                else {
+                  if (extras.activated !== true) reject(new ErrorResponse(false, 'User not activated.', 401, err))
+                  else {
+                    if (extras.expirationToken !== req.body.expirationToken) reject(new ErrorResponse(false, 'Invalid expiration token.', 401, err))
+                    else {
+                      // success
+                      let jwtToken = jwt.sign({
+                        sub: extras.sub,
+                        username: req.body.username,
+                        email: extras.email,
+                        phone: extras.phone,
+                        roles: extras.roles
+                      },'viltenauth',{
+                        expiresIn: '1d',
+                        algorithm: 'HS512',
+                        issuer: 'viltensro'
+                      })
+                      extras.expirationToken = randtoken.generate(process.env.EXPIRATION_TOKEN_LENGTH)
+                      users.setExtrasForUsername(req.body.username, extras, (err) => {
+                        if (err) {
+                          reject(new ErrorResponse(false, 'Server error.', 500, err))
+                        } else {
+                          resolve(new SuccessResponse(true, { username: req.body.username, token: jwtToken, expirationToken: extras.expirationToken }))
+                        }
+                      })
+                    }
+                  }
+                }
+              }
+            }
+          })
+        }).catch(err => {
+          console.log(err)
+          reject(new ErrorResponse(false, 'Server error.', 500, err))
+        })
+      } catch (e) {
+        console.log(err)
+        reject(new ErrorResponse(false, 'Unable to refresh token.', 500, err))
       }
     })
   }

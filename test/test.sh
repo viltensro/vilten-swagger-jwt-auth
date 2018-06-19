@@ -3,6 +3,8 @@
 curl -X POST "http://localhost:3000/api/v1/auth/login" -H  "accept: application/json" -d '{"username":"vilten2","password":"AAAaaa11","mfaToken":""}' -H "Content-Type: application/json"
 # logout
 curl "http://localhost:3000/api/v1/auth/logout" -H  "accept: application/json" -H "Authorization: eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MDNmOTk0OS00MjAyLTRhZmUtOGZmNy0wNDM2YTM2MzMwODQiLCJ1c2VybmFtZSI6InZpbHRlbiIsImVtYWlsIjoidmlsdGVuQHZpbHRlbi5zayIsInBob25lIjoiKzQyMTk1MDc5MDAwMCIsInJvbGVzIjpbImN1c3RvbWVyIl0sImlhdCI6MTUyNTI1MjY1NywiZXhwIjoxNTI1MzM5MDU3LCJpc3MiOiJ2aWx0ZW5zcm8ifQ.ZRDENPaT2eE_RIr48Pw4i-AmOPmaoejKRJNNFRBsUcOgJ50nyIqA7blGf1k0MoBjOU1MoPLCH7G7HsOL9k_9ig"
+# refresh
+curl -X POST "http://localhost:3000/api/v1/auth/refresh" -H  "accept: application/json" -d '{"username":"vilten2","expirationToken":"4gC3QfgG0PKm3a0KLMpniRo1Ug663tFn"}' -H "Content-Type: application/json"
 
 ## client ##
 # signup

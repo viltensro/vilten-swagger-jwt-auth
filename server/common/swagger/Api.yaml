@@ -53,6 +53,16 @@ definitions:
         type: string
       mfaToken:
         type: string
+  RefreshData:
+    type: object
+    required:
+      - expirationToken
+      - username
+    properties:
+      expirationToken:
+        type: string
+      username:
+        type: string
   ResetMfaData:
     type: object
     required:
@@ -164,10 +174,13 @@ definitions:
         required:
           - username
           - token
+          - expirationToken
         properties:
           username:
             type: string
           token:
+            type: string
+          expirationToken:
             type: string
   LogoutResponse:
     type: object
@@ -229,6 +242,29 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/LoginData"
+      responses:
+        200:
+          description: Login response
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      description: Refresh expired JWT token
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: refreshData
+          description: Refresh expired token
+          required: true
+          schema:
+            $ref: "#/definitions/RefreshData"
       responses:
         200:
           description: Login response
