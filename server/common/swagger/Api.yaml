@@ -298,6 +298,20 @@ paths:
             $ref: "#/definitions/ErrorResponse"
 
   # CLIENT API
+  /client/test:
+    get:
+      tags:
+        - Client
+      description: Testing api call, used to test if service is up
+      responses:
+        200:
+          description: Successful answer
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error response
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /client/signup:
     post:
       tags:

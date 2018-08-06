@@ -46,9 +46,14 @@ export default function (app, routes) {
     // Error handler to display the validation error as HTML
     app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars, no-shadow
       res.status(err.status || 500);
-      res.send(
-        `<h1>${err.status || 500} Error</h1>` +
-        `<pre>${err.message}</pre>`);
+      res.header("Content-Type",'application/json');
+      res.header('Access-control-allow-origin','*');
+      res.send(JSON.stringify({
+        success: false,
+        code: (err.status || 500),
+        message: (err.message || 'Unknown error'),
+        stack: ''
+      }));
     });
 
     routes(app);

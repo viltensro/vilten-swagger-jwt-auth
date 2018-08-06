@@ -33,6 +33,12 @@ function userMan() {
 }
 
 class ClientService {
+  test (req) {
+    return new Promise((resolve, reject) => {
+      resolve(new SuccessResponse(true, { test: true }))
+    })
+  }
+
   signup (req) {
     return new Promise((resolve, reject) => {
       try {
@@ -72,7 +78,7 @@ class ClientService {
                         enabled: true,
                         roles: ['customer'],
                         sub: sub,
-                        mfaType: disabled,
+                        mfaType: 'disabled',
                         mfaCode: '',
                         expirationToken: ''
                       }
@@ -168,7 +174,8 @@ class ClientService {
             } else {
               if (extras.activated === true) reject(new ErrorResponse(false, 'User already activated.', 500))
               else {
-                extras.activationCode = randtoken.generate(process.env.ACTIVATION_TOKEN_LENGTH)
+                const actCode = randtoken.generate(process.env.ACTIVATION_TOKEN_LENGTH)
+                extras.activationCode = actCode
                 extras.activationCodeExpiration = new Date().getTime() + (1000 * 60 * process.env.ACTIVATION_TOKEN_EXPIRATION)
                 users.setExtrasForUsername(req.body.username, extras, (err) => {
                   if (err) {
@@ -180,7 +187,7 @@ class ClientService {
                         from: process.env.SMTP_FROM,
                         to: extras.email,
                         subject: 'Your activation code.',
-                        text: 'Hello "' + req.body.username + '", your activation code is ' + extras.activationCode
+                        text: 'Hello "' + req.body.username + '", your activation code is ' + actCode
                       }
                       Mailer.getMailer().sendMail(mailOptions, (error, info) => {
                         if (error) {

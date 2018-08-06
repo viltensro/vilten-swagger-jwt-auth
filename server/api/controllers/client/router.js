@@ -3,6 +3,7 @@ import controller from './controller';
 
 export default express
   .Router()
+  .get('/test', controller.test)
   .post('/signup', controller.signup)
   .post('/activate-user', controller.activateUser)
   .post('/resend-activation', controller.resendActivation)

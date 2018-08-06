@@ -1,6 +1,6 @@
 {
   "name": "vilten-swagger-jwt-auth",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "description": "Vilten JWT Auth",
   "main": "index.js",
   "scripts": {
@@ -11,34 +11,34 @@
     "test": "node build.js && _mocha --compilers js:babel-register --exit"
   },
   "dependencies": {
-    "async": "^2.6.0",
-    "body-parser": "^1.18.2",
-    "circular-json": "^0.5.4",
+    "async": "^2.6.1",
+    "body-parser": "^1.18.3",
+    "circular-json": "^0.5.5",
     "cookie-parser": "^1.4.3",
     "crypto": "^1.0.1",
     "dotenv": "^5.0.1",
     "express": "^4.16.2",
-    "jsonwebtoken": "^8.2.1",
-    "mongodb": "^3.0.7",
-    "nodemailer": "^4.6.4",
-    "pino": "^4.15.0",
+    "jsonwebtoken": "^8.3.0",
+    "mongodb": "^3.1.1",
+    "nodemailer": "^4.6.7",
+    "pino": "^4.17.6",
     "rand-token": "^0.4.0",
-    "source-map-support": "^0.5.4",
+    "source-map-support": "^0.5.6",
     "speakeasy": "^2.0.0",
     "swagger-express-middleware": "^1.0.0-alpha.12",
-    "uuid": "^3.2.1"
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.2",
-    "babel-preset-env": "^1.6.1",
+    "babel-eslint": "^8.2.6",
+    "babel-preset-env": "^1.7.0",
     "backpack-core": "^0.7.0",
     "chai": "^4.1.2",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^11.3.2",
-    "eslint-plugin-import": "^2.7.0",
-    "mocha": "^5.0.5",
-    "shelljs": "^0.8.1",
-    "supertest": "^3.0.0"
+    "eslint-plugin-import": "^2.13.0",
+    "mocha": "^5.2.0",
+    "shelljs": "^0.8.2",
+    "supertest": "^3.1.0"
   },
   "author": "Viliam Tencer <vilten@vilten.sk> (http://www.vil10.com)"
 }

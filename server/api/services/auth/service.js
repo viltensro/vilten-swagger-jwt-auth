@@ -49,7 +49,7 @@ class AuthService {
                   // check enabled and activated
                   if (extras.enabled !== true) reject(new ErrorResponse(false, 'User not enabled.', 401, err))
                   else {
-                    if (extras.activated !== true) reject(new ErrorResponse(false, 'User not activated.', 401, err))
+                    if (extras.activated !== true) resolve(new ErrorResponse(false, 'User not activated.', 401, err))
                     else {
                       // success
                       let jwtToken = jwt.sign({
@@ -59,7 +59,7 @@ class AuthService {
                         phone: extras.phone,
                         roles: extras.roles
                       },'viltenauth',{
-                        expiresIn: '1d',
+                        expiresIn: '1h',
                         algorithm: 'HS512',
                         issuer: 'viltensro'
                       })
@@ -67,7 +67,7 @@ class AuthService {
                       switch (extras.mfaType) {
                         case 'authenticator':
                           if (!req.body.mfaToken) {
-                            reject(new ErrorResponse(false, 'Authenticator MFA token is required.', 401, err))
+                            resolve(new ErrorResponse(false, 'Authenticator MFA token is required.', 401, err))
                           } else {
                             const params = {
                               secret: extras.mfaCode,
@@ -193,7 +193,7 @@ class AuthService {
                         phone: extras.phone,
                         roles: extras.roles
                       },'viltenauth',{
-                        expiresIn: '1d',
+                        expiresIn: '1h',
                         algorithm: 'HS512',
                         issuer: 'viltensro'
                       })

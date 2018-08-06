@@ -1,6 +1,14 @@
 import ClientService from '../../services/client/service';
 
 export class Controller {
+  test (req, res) {
+    ClientService.test(req)
+    .then(r => res.json(r))
+    .catch(err => res
+      .status(err.code)
+      .json(err))
+  }
+
   signup (req, res) {
     ClientService.signup(req)
       .then(r => res.json(r))
